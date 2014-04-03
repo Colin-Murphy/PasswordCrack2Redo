@@ -23,8 +23,6 @@ import java.io.FileNotFoundException;
 //Hex Class
 import edu.rit.util.Hex;
 
-//Users are contained in a hashmap
-import java.util.*;
 
 
 import edu.rit.pj2.IntVbl;
@@ -44,7 +42,7 @@ public class PasswordCrack2 extends Task {
     IntVbl found;
     
     //Hashmap to contain the users and their hashed passwords
-	private HashMap<String, String> users = new HashMap<String, String>();
+	private ArrayList<User> users = new ArrayList<User>();
 
     /**
      * Main program.
@@ -90,7 +88,7 @@ public class PasswordCrack2 extends Task {
 				String[] tokens = line.split("\\s+");
 				
 				//Add this password and use to the hashmap
-				users.put(tokens[1], tokens[0]);
+				users.add(new User(tokens[0], tokens[1]));
 
 				
 			}
@@ -108,19 +106,13 @@ public class PasswordCrack2 extends Task {
         parallelFor (0, 1727603) .exec (new Loop() {
             // Thread-local reduction variable for number of passwords found.
             IntVbl thrFound;
-
-            // TBD
             
-            /*
             public void start() {
             	thrFound = threadLocal(found);
             }
-            */
 
             public void run (int i) throws Exception {
-            	
-            	thrFound = threadLocal(found);
-            	
+            	            	
                 String password = getPassword (i);
                 //Get the password hash of the index in base 36 as a string
                 
@@ -137,10 +129,14 @@ public class PasswordCrack2 extends Task {
 
 				String hex = Hex.toString(data);
 				
-				//If this hash exists then print it
-				if (users.containsKey(hex)) {
-					System.out.println(users.get(hex) + " " + password);
-					thrFound.item++;
+				for (int j = 0; j<users.size();j++) {
+					User user = users.get(j);
+					//If this hash exists then print it
+					if (user.password.equals(hex) && !user.printed) {
+						System.out.println(user.username + " " + password);
+						user.printed = true;
+						thrFound.item++;
+					}
 				}
 			}
 		});
@@ -201,4 +197,35 @@ public class PasswordCrack2 extends Task {
             return "" + thousands + hundreds + tens + ones;
         }
 	}
+	/**
+		Private nested class for representing a user
+	*/
+	private class User {
+		/**
+			Username string
+		*/
+		String username;
+		/**
+			Password string
+		*/
+		String password;
+		
+		//Dont want to reprint in the case of multiple users with the same passwords
+		boolean printed = false;
+		
+		
+		/**
+			Construct a new user object
+			@param username: The username
+			@param password: The password
+		*/
+		public User (String username, String password) {
+			//Assign variables
+			this.username = username;
+			this.password = password;
+		}
+	}
 }
+
+
+	
