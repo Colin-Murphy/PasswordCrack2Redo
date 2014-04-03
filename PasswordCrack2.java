@@ -110,10 +110,18 @@ public class PasswordCrack2 extends Task {
             IntVbl thrFound;
 
             // TBD
+            
+            /*
+            public void start() {
+            	thrFound = threadLocal(found);
+            }
+            */
 
             public void run (int i) throws Exception {
+            	
+            	thrFound = threadLocal(found);
+            	
                 String password = getPassword (i);
-                thrFound = threadLocal(found);
                 //Get the password hash of the index in base 36 as a string
                 
                 byte[] data;
